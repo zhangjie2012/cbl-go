@@ -1,6 +1,7 @@
 package cbl
 
 import (
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -22,6 +23,14 @@ func init() {
 	prometheus.MustRegister(apiCalledLatency)
 }
 
+func removeUriQueryString(uri string) string {
+	ss := strings.Split(uri, "?")
+	if len(ss) > 1 {
+		return ss[0]
+	}
+	return uri
+}
+
 // PromGinMiddleware prometheus for gin, register code:
 // `router.GET("/metrics", gin.WrapH(promhttp.HandlerFor(prometheus.DefaultGatherer, promhttp.HandlerOpts{})))`
 func PromGinMiddleware() gin.HandlerFunc {
@@ -29,7 +38,8 @@ func PromGinMiddleware() gin.HandlerFunc {
 		start := time.Now()
 		defer func() {
 			duration := time.Since(start) // nanosecond
-			apiCalledLatency.WithLabelValues(c.Request.RequestURI, c.Request.Method).Observe(float64(duration))
+			apiName := removeUriQueryString(c.Request.RequestURI)
+			apiCalledLatency.WithLabelValues(apiName, c.Request.Method).Observe(float64(duration))
 		}()
 
 		c.Next()
