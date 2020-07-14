@@ -1,0 +1,27 @@
+* cbl-go: Common Basic Library for go
+
+/只自己使用/
+
+模块：
+
+- =cache= 基于 redis 的 KV 缓存
+- =conv= 类型转换
+- =errcode= web 常用错误码
+- =gen= token/id 生成器
+- =ginext= gin 扩展（标准化）
+- =net= 网络扩展
+- =prom= prometheus middware
+- =wechat_mini= 微信小程序
+- =yinyang= 公历和农历转换
+
+安装：
+
+#+begin_src
+go get -u github.com/zhangjie2012/cbl-go
+#+end_src
+
+运行测试用例：
+
+#+begin_src
+go test -count=1 -v ./...
+#+end_src
