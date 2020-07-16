@@ -1,6 +1,15 @@
 package cbl
 
-import "testing"
+import (
+	"testing"
+)
+
+func TestToString(t *testing.T) {
+	y, _ := ConvYangYin(2020, 6, 25)
+	t.Log(y.ToString1())
+	t.Log(y.ToString2())
+	t.Log(y.ToString3())
+}
 
 func TestConvYinYang(t *testing.T) {
 	y, err := ConvYinYang(2020, 5, 0, 5)

@@ -51,6 +51,10 @@ func (y *YinDate) ToString2() string {
 	return full
 }
 
+func (y *YinDate) ToString3() string {
+	return fmt.Sprintf("%d年%d月%d日", y.YearNum, y.MonthNum, y.DayNum)
+}
+
 // ConvYinYang 农历转公历
 func ConvYinYang(year int, month int, leap int, day int) (time.Time, error) {
 	url := fmt.Sprintf("%s/api/v1/conv/yin-yang/%d/%d/%d/%d", yyServer, year, month, leap, day)
