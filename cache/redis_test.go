@@ -70,14 +70,20 @@ func TestSetGetObject(t *testing.T) {
 	}
 }
 
-func TestTLL(t *testing.T) {
+func TestTTL(t *testing.T) {
 	var (
 		key = "TestTLL"
-		ttl = 1000 * time.Millisecond
+		ttl = 1234 * time.Millisecond
 	)
 	SetString(key, "whatever", ttl)
-	real := TTL(key)
-	t.Logf("set ttl = %d, get ttl = %d", ttl.Milliseconds(), real.Milliseconds())
+	{
+		real := TTL(key)
+		t.Logf("set ttl = %d, get ttl = %d", ttl.Milliseconds(), real.Milliseconds())
+	}
+	{
+		real := PTTL(key)
+		t.Logf("set ttl = %d, get ttl = %d", ttl.Milliseconds(), real.Milliseconds())
+	}
 }
 
 func TestSetGetString(t *testing.T) {

@@ -120,6 +120,18 @@ func TTL(key string) time.Duration {
 	return d
 }
 
+// TTL milliseconds resolution
+//   The command returns -1 if the key exists but has no associated expire.
+//   The command returns -2 if the key does not exist.
+func PTTL(key string) time.Duration {
+	realKey := composeKey(key)
+	d, err := redisClient.PTTL(realKey).Result()
+	if err != nil {
+		return 0
+	}
+	return d
+}
+
 func SetString(key string, value string, expire time.Duration) error {
 	realKey := composeKey(key)
 
