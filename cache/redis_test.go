@@ -95,6 +95,25 @@ func TestDel(t *testing.T) {
 	t.Logf(GetString(key))
 }
 
+func TestSetGetInt64(t *testing.T) {
+	var (
+		key         = "TestSetGetInt64"
+		value int64 = 123456789
+	)
+	if err := SetInt64(key, value, 10*time.Millisecond); err != nil {
+		t.Errorf("set string failure, err=%s", err)
+		return
+	}
+
+	gValue, err := GetInt64(key)
+	if err != nil {
+		t.Errorf("get string failure, err=%s", err)
+		return
+	}
+
+	t.Log(value, gValue)
+}
+
 func TestSetGetString(t *testing.T) {
 	var (
 		key   = "TestSetGetString"

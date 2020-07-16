@@ -191,6 +191,24 @@ func GetInt(key string) (int, error) {
 	return value, nil
 }
 
+func SetInt64(key string, value int64, expire time.Duration) error {
+	return SetString(key, strconv.FormatInt(value, 10), expire)
+}
+
+func GetInt64(key string) (int64, error) {
+	realKey := composeKey(key)
+
+	value, err := redisClient.Get(realKey).Int64()
+	if err != nil {
+		if err == redis.Nil {
+			logrus.Tracef("cache missing, key=%s", realKey)
+			return 0, NotExist
+		}
+		return 0, err
+	}
+	return value, nil
+}
+
 func SetFloat64(key string, value float64, expire time.Duration) error {
 	return SetString(key, strconv.FormatFloat(value, 'f', -1, 64), expire)
 }
