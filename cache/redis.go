@@ -15,8 +15,9 @@ var (
 )
 
 var (
-	appName     string        = "not_set" // for compose key
-	redisClient *redis.Client = nil
+	appName       string        = "not_set" // for compose key
+	disLockModule string        = "dislock"
+	redisClient   *redis.Client = nil
 )
 
 // InitCache init cache, only init once
@@ -52,6 +53,10 @@ func CloseCache() {
 
 func composeKey(source string) string {
 	return fmt.Sprintf("%s:%s", appName, source)
+}
+
+func composeKey2(module string, key string) string {
+	return fmt.Sprintf("%s:%s.%s", appName, module, key)
 }
 
 // SetObject set object, object must be json marshaled
@@ -177,4 +182,35 @@ func GetFloat64(key string) (float64, error) {
 	logrus.Tracef("cache get float64|%s", realKey)
 
 	return value, nil
+}
+
+// -----------------------------------------------------------------------------
+// distribute lock
+//   - name: lock key
+//   - ticket: lock unique flag, avoid anther process unlock, make sure only one
+//           process lock, then unlock it
+//   - expire: lock timeout, avoid process dead forget unlock it
+// Note: not consider redis server down caused deadlock
+// -----------------------------------------------------------------------------
+func Lock(name string, ticket string, expire time.Duration) bool {
+	lockKey := composeKey2(disLockModule, name)
+	result := redisClient.SetNX(lockKey, ticket, expire).Val()
+	// logrus.Tracef("distributed lock|%s|%s|%v|%t", name, ticket, expire, result)
+	return result
+}
+
+func UnLock(name string, ticket string) {
+	lockKey := composeKey2(disLockModule, name)
+	v, err := redisClient.Get(lockKey).Result()
+	if err != nil {
+		return
+	}
+
+	// just can unlock itself
+	if v == ticket {
+		redisClient.Del(lockKey)
+		// logrus.Tracef("distribute unlock success|%s|%s", name, ticket)
+	} else {
+		logrus.Tracef("distribute unlock failue|%s|%s|%s", name, v, ticket)
+	}
 }

@@ -3,10 +3,12 @@ package cache
 import (
 	"fmt"
 	"os"
+	"sync"
 	"testing"
 	"time"
 
 	"github.com/sirupsen/logrus"
+	"github.com/zhangjie2012/cbl-go"
 )
 
 func TestMain(m *testing.M) {
@@ -142,4 +144,58 @@ func TestSetGetFloat64(t *testing.T) {
 		t.Errorf("get set not equal, expect=%f, real=%f", value, gValue)
 		return
 	}
+}
+
+func TestDisLock0(t *testing.T) {
+	var (
+		key    = "awesomelock0"
+		ticket = cbl.GenRSessionID()
+	)
+	r := Lock(key, ticket, 10*time.Second)
+	if !r {
+		t.Logf("lock failure")
+	}
+	UnLock(key, ticket)
+}
+
+func TestDisLock1(t *testing.T) {
+	var (
+		key    = "awesomelock1"
+		ticket = cbl.GenRSessionID()
+	)
+
+	wg := sync.WaitGroup{}
+
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		r := Lock(key, ticket, 10*time.Second)
+		if !r {
+			t.Logf("lock failure")
+		}
+		t.Logf("thread1 lock|%s|%s", key, ticket)
+		time.Sleep(100 * time.Millisecond)
+		UnLock(key, ticket)
+		t.Logf("thread1 unlock|%s|%s", key, ticket)
+	}()
+
+	time.Sleep(5 * time.Millisecond)
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		for {
+			r := Lock(key, ticket, 10*time.Second)
+			if !r {
+				t.Logf("not get lock, waiting")
+				time.Sleep(10 * time.Millisecond)
+				continue
+			}
+			t.Logf("thread2 get lock")
+			UnLock(key, ticket)
+			t.Logf("thread2 get unlock")
+			break
+		}
+	}()
+
+	wg.Wait()
 }
