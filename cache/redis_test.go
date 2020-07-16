@@ -199,3 +199,136 @@ func TestDisLock1(t *testing.T) {
 
 	wg.Wait()
 }
+
+func TestMQ(t *testing.T) {
+	key := "mqtest"
+	value := "awesome_values"
+	if err := MQPush(key, []byte(value)); err != nil {
+		t.Log("push message failure")
+		return
+	}
+
+	bs, err := MQPop(key)
+	if err != nil {
+		t.Logf("pop message failure|%s", err)
+	}
+	t.Log(string(bs))
+
+	bs, err = MQPop(key)
+	if err != nil {
+		t.Logf("pop message failure|%s", err)
+	}
+	t.Log(string(bs))
+}
+
+// producer and consumer
+func TestMQ1(t *testing.T) {
+	key := "mqtest1"
+	count := 1000
+	wg := sync.WaitGroup{}
+
+	t.Logf("%s mq len = %d", key, MQDel(key))
+
+	// producer
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		for i := 0; i < count; i++ {
+			MQPush(key, []byte(fmt.Sprintf("message_%d", i)))
+			time.Sleep(1 * time.Microsecond)
+		}
+	}()
+
+	// consumer
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		for i := 0; i < count; {
+			_, err := MQPop(key)
+			if err != nil && err != NotExist {
+				t.Log(err.Error())
+				break
+			}
+			if err == NotExist {
+				t.Log("wait producer ...")
+				time.Sleep(1 * time.Microsecond)
+				continue
+			}
+			i++
+		}
+	}()
+
+	wg.Wait()
+}
+
+// producer and consumer
+func TestMQ2(t *testing.T) {
+	key := "mqtest2"
+	count := 1000
+	wg := sync.WaitGroup{}
+
+	t.Logf("%s mq len = %d", key, MQDel(key))
+
+	// producer
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		for i := 0; i < count; i++ {
+			MQPush(key, []byte(fmt.Sprintf("message_%d", i)))
+			time.Sleep(1 * time.Microsecond)
+		}
+	}()
+
+	// consumer
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		for i := 0; i < count; {
+			_, err := MQBlockPop(key, 1*time.Microsecond)
+			if err != nil && err != NotExist {
+				t.Log(err.Error())
+				break
+			}
+			if err == nil {
+				i++
+			}
+		}
+	}()
+
+	wg.Wait()
+}
+
+func TestMQ3(t *testing.T) {
+	key := "mqtest3"
+	count := 1000
+	wg := sync.WaitGroup{}
+
+	t.Logf("%s mq len = %d", key, MQDel(key))
+
+	// producer
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		for i := 0; i < count; i++ {
+			MQPush(key, []byte(fmt.Sprintf("message_%d", i)))
+			time.Sleep(1 * time.Microsecond)
+		}
+	}()
+
+	// consumer
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		for i := 0; i < count; {
+			if MQLen(key) != 0 {
+				MQPop(key)
+				i++
+			} else {
+				t.Log("empty queue")
+				time.Sleep(1 * time.Microsecond)
+			}
+		}
+	}()
+
+	wg.Wait()
+}

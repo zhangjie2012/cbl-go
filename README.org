@@ -1,10 +1,13 @@
 * cbl-go: Common Basic Library for go
 
-/目前只自己使用/
+/目前只自己使用，不保证稳定性。/
 
 模块：
 
-- =cache= 基于 redis 的 KV 缓存，基于 redis 的分布式锁
+- =cache=
+  + 基于 redis 的 KV 缓存
+  + 基于 redis 的分布式锁
+  + 基于 redis 的 message queue
 - =conv= 类型转换
 - =errcode= web 常用错误码
 - =gen= token/id 生成器
@@ -24,4 +27,5 @@ go get -u github.com/zhangjie2012/cbl-go
 
 #+begin_src
 go test -count=1 -v ./...
+go test -count=1 -v cache/* -test.run TestMQ
 #+end_src

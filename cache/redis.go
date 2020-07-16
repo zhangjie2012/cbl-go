@@ -15,9 +15,12 @@ var (
 )
 
 var (
-	appName       string        = "not_set" // for compose key
-	disLockModule string        = "dislock"
-	redisClient   *redis.Client = nil
+	// for compose key
+	appName       string = "not_set"
+	disLockModule string = "_dislock_"
+	mqModule      string = "_mq_"
+
+	redisClient *redis.Client = nil
 )
 
 // InitCache init cache, only init once
@@ -49,6 +52,11 @@ func CloseCache() {
 	}
 
 	logrus.Infof("close cache")
+}
+
+// C expose redis client for native redis library visit
+func C() *redis.Client {
+	return redisClient
 }
 
 func composeKey(source string) string {
@@ -213,4 +221,65 @@ func UnLock(name string, ticket string) {
 	} else {
 		logrus.Tracef("distribute unlock failue|%s|%s|%s", name, v, ticket)
 	}
+}
+
+// -----------------------------------------------------------------------------
+// message queue
+//   - redis structure list map to a message queue
+//   - right push, left pop
+// -----------------------------------------------------------------------------
+
+func MQPush(key string, bs []byte) error {
+	mqKey := composeKey2(mqModule, key)
+	_, err := redisClient.RPush(mqKey, bs).Result()
+	return err
+}
+
+func MQPop(key string) ([]byte, error) {
+	mqKey := composeKey2(mqModule, key)
+	bs, err := redisClient.LPop(mqKey).Bytes()
+	if err == redis.Nil {
+		return nil, NotExist
+	}
+	return bs, err
+}
+
+// MQBlockPop block pop, in comparison, block pop fast than polling pop
+func MQBlockPop(key string, timeout time.Duration) ([]byte, error) {
+	// timeout min value is 1s
+	if timeout.Seconds() < 1 {
+		timeout = time.Second
+	}
+	mqKey := composeKey2(mqModule, key)
+	result, err := redisClient.BLPop(timeout, mqKey).Result()
+	if err != nil && err != redis.Nil {
+		return nil, err
+	}
+	if err == redis.Nil {
+		return nil, NotExist
+	}
+
+	// result[] is key name
+	return []byte(result[1]), nil
+}
+
+func MQLen(key string) int64 {
+	mqKey := composeKey2(mqModule, key)
+	count, err := redisClient.LLen(mqKey).Result()
+	if err != nil {
+		logrus.Tracef("mqlen error|%s", err)
+		return 0
+	}
+	return count
+}
+
+// MQDel delete mq return count
+func MQDel(key string) int64 {
+	mqKey := composeKey2(mqModule, key)
+	count, err := redisClient.Del(mqKey).Result()
+	if err != nil {
+		logrus.Tracef("mqdel error|%s", err)
+		return 0
+	}
+	return count
 }
