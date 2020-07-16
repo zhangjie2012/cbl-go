@@ -86,6 +86,15 @@ func TestTTL(t *testing.T) {
 	}
 }
 
+func TestDel(t *testing.T) {
+	var (
+		key = "TestDel"
+	)
+	SetString(key, "whatever", 0)
+	Del(key)
+	t.Logf(GetString(key))
+}
+
 func TestSetGetString(t *testing.T) {
 	var (
 		key   = "TestSetGetString"

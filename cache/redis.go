@@ -120,7 +120,7 @@ func TTL(key string) time.Duration {
 	return d
 }
 
-// TTL milliseconds resolution
+// PTTL milliseconds resolution
 //   The command returns -1 if the key exists but has no associated expire.
 //   The command returns -2 if the key does not exist.
 func PTTL(key string) time.Duration {
@@ -130,6 +130,14 @@ func PTTL(key string) time.Duration {
 		return 0
 	}
 	return d
+}
+
+func Del(key string) {
+	realKey := composeKey(key)
+	_, err := redisClient.Del(realKey).Result()
+	if err != nil {
+		logrus.Tracef("del error|%s", err)
+	}
 }
 
 func SetString(key string, value string, expire time.Duration) error {
@@ -285,7 +293,7 @@ func MQLen(key string) int64 {
 	return count
 }
 
-// MQDel delete mq return count
+// MQDel delete mq return count, mq key can not use `Del` delete, they have different compose method
 func MQDel(key string) int64 {
 	mqKey := composeKey2(mqModule, key)
 	count, err := redisClient.Del(mqKey).Result()
