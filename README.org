@@ -1,3 +1,5 @@
+[[https://github.com/zhangjie2012/cbl-go/workflows/Go/badge.svg]]
+
 * cbl-go: Common Basic Library for go
 
 /目前只自己使用，不保证稳定性。/
