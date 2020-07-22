@@ -8,6 +8,7 @@ func B2i(b bool) int {
 	return 0
 }
 
+// I2b int t bool
 func I2b(i int) bool {
 	return i != 0
 }
