@@ -18,7 +18,7 @@ type WXMiniSession struct {
 	UnionID    string `json:"unionid"`
 }
 
-// Code2Session wxlogin code to session id
+// Code2Session wxlogin code to session id.
 // https://developers.weixin.qq.com/miniprogram/dev/api-backend/open-api/login/auth.code2Session.html
 func Code2Session(appID string, secret string, code string) (*WXMiniSession, error) {
 	api := fmt.Sprintf("%s/sns/jscode2session?appid=%s&secret=%s&js_code=%s&grant_type=authorization_code",

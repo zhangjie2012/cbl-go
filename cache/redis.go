@@ -1,3 +1,30 @@
+/*
+Package cache based on NoSQL Redis, encapsulated common scenario.
+
+*Basic*
+
+- Init/Close
+- string/int/int64/float64/object Getter/Setter Delete
+- TTL/PTTL
+- compose redis key used appname/module prevent key repeat
+
+*Distribute Lock*
+
+support lock/unlock on distributed environment.
+`ticket` for lock unique flag, avoid anther process unlock, make sure only one process lock, then unlock it.
+`expire` lock timeout, avoid process dead forget unlock it.
+
+Note: not consider redis server down caused deadlock.
+
+*Message Queue*
+
+based on redis data structure `list` map to a message queue. and `right push`, `left pop`.
+
+*Counter*
+
+a global counter.
+*/
+
 package cache
 
 import (
@@ -110,8 +137,8 @@ func GetObject(key string, value interface{}) error {
 }
 
 // TTL seconds resolution
-//   The command returns -1 if the key exists but has no associated expire.
-//   The command returns -2 if the key does not exist.
+// - The command returns -1 if the key exists but has no associated expire.
+// - The command returns -2 if the key does not exist.
 func TTL(key string) time.Duration {
 	realKey := composeKey(key)
 	d, err := redisClient.TTL(realKey).Result()
@@ -122,8 +149,8 @@ func TTL(key string) time.Duration {
 }
 
 // PTTL milliseconds resolution
-//   The command returns -1 if the key exists but has no associated expire.
-//   The command returns -2 if the key does not exist.
+// - The command returns -1 if the key exists but has no associated expire.
+// - The command returns -2 if the key does not exist.
 func PTTL(key string) time.Duration {
 	realKey := composeKey(key)
 	d, err := redisClient.PTTL(realKey).Result()
@@ -231,14 +258,6 @@ func GetFloat64(key string) (float64, error) {
 	return value, nil
 }
 
-// -----------------------------------------------------------------------------
-// distribute lock
-//   - name: lock key
-//   - ticket: lock unique flag, avoid anther process unlock, make sure only one
-//           process lock, then unlock it
-//   - expire: lock timeout, avoid process dead forget unlock it
-// Note: not consider redis server down caused deadlock
-// -----------------------------------------------------------------------------
 func Lock(name string, ticket string, expire time.Duration) bool {
 	lockKey := composeKey2(disLockModule, name)
 	result := redisClient.SetNX(lockKey, ticket, expire).Val()
@@ -261,12 +280,6 @@ func UnLock(name string, ticket string) {
 		logrus.Tracef("distribute unlock failue|%s|%s|%s", name, v, ticket)
 	}
 }
-
-// -----------------------------------------------------------------------------
-// message queue
-//   - redis structure list map to a message queue
-//   - right push, left pop
-// -----------------------------------------------------------------------------
 
 func MQPush(key string, bs []byte) error {
 	mqKey := composeKey2(mqModule, key)
@@ -322,11 +335,6 @@ func MQDel(key string) int64 {
 	}
 	return count
 }
-
-// -----------------------------------------------------------------------------
-// Counter a global aotmic counter
-//   a new counter must start from `incr`
-// -----------------------------------------------------------------------------
 
 // CounterIncr atomic increment 1, return inc result value
 func CounterIncr(key string, expire time.Duration) (int64, error) {

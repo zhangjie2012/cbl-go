@@ -32,7 +32,7 @@ func removeUriQueryString(uri string) string {
 }
 
 // PromGinMiddleware prometheus for gin, register code:
-// `router.GET("/metrics", gin.WrapH(promhttp.HandlerFor(prometheus.DefaultGatherer, promhttp.HandlerOpts{})))`
+//     router.GET("/metrics", gin.WrapH(promhttp.HandlerFor(prometheus.DefaultGatherer, promhttp.HandlerOpts{})))
 func PromGinMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		start := time.Now()
