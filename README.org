@@ -1,5 +1,7 @@
 [[https://github.com/zhangjie2012/cbl-go/workflows/Go/badge.svg]]
 
+[[https://pkg.go.dev/github.com/zhangjie2012/cbl-go][https://img.shields.io/badge/go.dev-reference-007d9c?logo=go&logoColor=white&style=flat-square]]
+
 * cbl-go: Common Basic Library for go
 
 /目前只自己使用，不保证稳定性。/
