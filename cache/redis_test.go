@@ -366,3 +366,28 @@ func TestMQ3(t *testing.T) {
 
 	wg.Wait()
 }
+
+func TestCounter(t *testing.T) {
+	key := "global.counter"
+	expire := 10 * time.Second
+
+	v, err := CounterIncr(key, expire)
+	t.Log(v, err) // 1
+
+	v, err = CounterIncrBy(key, 999, expire)
+	t.Log(v, err) // 1000
+
+	v, err = CounterDecr(key)
+	t.Log(v, err) // 999
+
+	v, err = CounterDecrBy(key, 99)
+	t.Log(v, err) // 900
+
+	err = CounterReset(key, expire)
+	t.Log(err)
+
+	v, err = CounterIncr(key, expire)
+	t.Log(v, err) // 1
+
+	CounterDel(key)
+}

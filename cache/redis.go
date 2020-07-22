@@ -19,6 +19,7 @@ var (
 	appName       string = "not_set"
 	disLockModule string = "_dislock_"
 	mqModule      string = "_mq_"
+	counterModule string = "_counter_"
 
 	redisClient *redis.Client = nil
 )
@@ -320,4 +321,57 @@ func MQDel(key string) int64 {
 		return 0
 	}
 	return count
+}
+
+// -----------------------------------------------------------------------------
+// Counter a global aotmic counter
+//   a new counter must start from `incr`
+// -----------------------------------------------------------------------------
+
+// CounterIncr atomic increment 1, return inc result value
+func CounterIncr(key string, expire time.Duration) (int64, error) {
+	aKey := composeKey2(counterModule, key)
+
+	pipe := redisClient.Pipeline()
+	incr := pipe.Incr(aKey)
+	pipe.Expire(aKey, expire)
+	_, err := pipe.Exec()
+
+	return incr.Val(), err
+}
+
+// CounterIncrBy atomic increment n, return incrby result value
+func CounterIncrBy(key string, n int64, expire time.Duration) (int64, error) {
+	aKey := composeKey2(counterModule, key)
+
+	pipe := redisClient.Pipeline()
+	incr := pipe.IncrBy(aKey, n)
+	pipe.Expire(aKey, expire)
+	_, err := pipe.Exec()
+
+	return incr.Val(), err
+}
+
+// CounterDecr atomic decrement 1, return decr result value
+func CounterDecr(key string) (int64, error) {
+	aKey := composeKey2(counterModule, key)
+	return redisClient.Decr(aKey).Result()
+}
+
+// CounterDecrBy atomic decrement n, return decr result value
+func CounterDecrBy(key string, n int64) (int64, error) {
+	aKey := composeKey2(counterModule, key)
+	return redisClient.DecrBy(aKey, n).Result()
+}
+
+// CounterReset reset counter to 0
+func CounterReset(key string, expire time.Duration) error {
+	aKey := composeKey2(counterModule, key)
+	_, err := redisClient.Set(aKey, "0", expire).Result()
+	return err
+}
+
+func CounterDel(key string) {
+	aKey := composeKey2(counterModule, key)
+	redisClient.Del(aKey)
 }

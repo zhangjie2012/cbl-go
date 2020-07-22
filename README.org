@@ -10,6 +10,7 @@
   + 基于 redis 的 KV 缓存
   + 基于 redis 的分布式锁
   + 基于 redis 的 message queue
+  + 基于 redis 的全局计数器（counter）
 - =conv= 类型转换
 - =errcode= web 常用错误码
 - =gen= token/id 生成器
