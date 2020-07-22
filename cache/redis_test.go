@@ -380,6 +380,9 @@ func TestCounter(t *testing.T) {
 	v, err = CounterDecr(key)
 	t.Log(v, err) // 999
 
+	v, err = CounterGet(key)
+	t.Log(v, err) // 999
+
 	v, err = CounterDecrBy(key, 99)
 	t.Log(v, err) // 900
 

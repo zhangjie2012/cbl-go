@@ -1,30 +1,3 @@
-/*
-Package cache based on NoSQL Redis, encapsulated common scenario.
-
-*Basic*
-
-- Init/Close
-- string/int/int64/float64/object Getter/Setter Delete
-- TTL/PTTL
-- compose redis key used appname/module prevent key repeat
-
-*Distribute Lock*
-
-support lock/unlock on distributed environment.
-`ticket` for lock unique flag, avoid anther process unlock, make sure only one process lock, then unlock it.
-`expire` lock timeout, avoid process dead forget unlock it.
-
-Note: not consider redis server down caused deadlock.
-
-*Message Queue*
-
-based on redis data structure `list` map to a message queue. and `right push`, `left pop`.
-
-*Counter*
-
-a global counter.
-*/
-
 package cache
 
 import (
@@ -379,7 +352,21 @@ func CounterReset(key string, expire time.Duration) error {
 	return err
 }
 
+// CounterDel delete counter
 func CounterDel(key string) {
 	aKey := composeKey2(counterModule, key)
 	redisClient.Del(aKey)
+}
+
+// CounterGet get counter value
+func CounterGet(key string) (int64, error) {
+	aKey := composeKey2(counterModule, key)
+	value, err := redisClient.Get(aKey).Int64()
+	if err != nil {
+		if err == redis.Nil {
+			return 0, nil
+		}
+		return 0, err
+	}
+	return value, nil
 }
