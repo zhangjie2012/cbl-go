@@ -11,7 +11,8 @@ import (
 )
 
 var (
-	NotExist error = fmt.Errorf("key not exist")
+	NotExist    error = fmt.Errorf("key not exist")
+	CounterZero error = fmt.Errorf("counter zero")
 )
 
 var (
@@ -337,6 +338,34 @@ func CounterIncrBy(key string, n int64, expire time.Duration) (int64, error) {
 func CounterDecr(key string) (int64, error) {
 	aKey := composeKey2(counterModule, key)
 	return redisClient.Decr(aKey).Result()
+}
+
+func CounterDecrMinZero(key string) (int64, error) {
+	aKey := composeKey2(counterModule, key)
+
+	script := `
+local v = redis.call("GET", KEYS[1])
+if v == nil then
+   return -2
+end
+
+if tonumber(v) > 0 then
+   return redis.call("DECR", KEYS[1])
+else
+   return -1
+end
+	`
+	result, err := redisClient.Eval(script, []string{aKey}).Int64()
+	if err != nil {
+		return 0, err
+	}
+	if result == -2 {
+		return 0, NotExist
+	}
+	if result == -1 {
+		return 0, CounterZero
+	}
+	return result, nil
 }
 
 // CounterDecrBy atomic decrement n, return decr result value

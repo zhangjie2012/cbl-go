@@ -391,5 +391,21 @@ func TestCounter(t *testing.T) {
 	v, err = CounterIncr(key, expire)
 	t.Log(v, err) // 1
 
+	v, err = CounterDecrMinZero(key)
+	t.Log(v, err) // 0, nil
+
+	v, err = CounterDecrMinZero(key)
+	t.Log(v, err) // 0, "counter zero"
+
 	CounterDel(key)
+}
+
+func TestLua(t *testing.T) {
+	key := "global.counter"
+	// expire := 10000 * time.Second
+
+	// v, err := CounterIncrBy(key, 10, expire)
+	//t.Log(v, err)
+
+	CounterDecrMinZero(key)
 }
