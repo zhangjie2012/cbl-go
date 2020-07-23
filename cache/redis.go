@@ -313,7 +313,7 @@ func MQDel(key string) int64 {
 func CounterIncr(key string, expire time.Duration) (int64, error) {
 	aKey := composeKey2(counterModule, key)
 
-	pipe := redisClient.Pipeline()
+	pipe := redisClient.TxPipeline()
 	incr := pipe.Incr(aKey)
 	pipe.Expire(aKey, expire)
 	_, err := pipe.Exec()
@@ -325,7 +325,7 @@ func CounterIncr(key string, expire time.Duration) (int64, error) {
 func CounterIncrBy(key string, n int64, expire time.Duration) (int64, error) {
 	aKey := composeKey2(counterModule, key)
 
-	pipe := redisClient.Pipeline()
+	pipe := redisClient.TxPipeline()
 	incr := pipe.IncrBy(aKey, n)
 	pipe.Expire(aKey, expire)
 	_, err := pipe.Exec()

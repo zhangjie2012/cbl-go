@@ -8,7 +8,6 @@ import (
 	"time"
 
 	"github.com/sirupsen/logrus"
-	"github.com/zhangjie2012/cbl-go"
 )
 
 func TestMain(m *testing.M) {
@@ -183,7 +182,7 @@ func TestSetGetFloat64(t *testing.T) {
 func TestDisLock0(t *testing.T) {
 	var (
 		key    = "awesomelock0"
-		ticket = cbl.GenRSessionID()
+		ticket = "ticket_0"
 	)
 	r := Lock(key, ticket, 10*time.Second)
 	if !r {
@@ -195,7 +194,7 @@ func TestDisLock0(t *testing.T) {
 func TestDisLock1(t *testing.T) {
 	var (
 		key    = "awesomelock1"
-		ticket = cbl.GenRSessionID()
+		ticket = "ticket_1"
 	)
 
 	wg := sync.WaitGroup{}
