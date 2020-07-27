@@ -7,8 +7,10 @@ Package cbl is a common basic library for go.
   - `ginext` gin 扩展（标准化）
   - `net` 网络扩展
   - `prom` prometheus middware
+  - `strings` 字符串扩展
   - `wechat_mini` 微信小程序
   - `yinyang` 公历和农历转换
 
+More read `README.md`
 */
 package cbl
