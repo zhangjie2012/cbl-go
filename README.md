@@ -3,15 +3,13 @@
 
 # cbl-go: Common Basic Library for go
 
-__目前只自己使用，不保证稳定性。__
-
-安装：
+Install:
 
 ``` shell
 go get -u github.com/zhangjie2012/cbl-go
 ```
 
-运行测试用例：
+Run TestCase:
 
 ``` shell
 go test -count=1 -v ./...
