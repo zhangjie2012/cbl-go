@@ -30,7 +30,7 @@ const (
 )
 
 // New new a ByteSize from byte size
-func New(n int) ByteSize {
+func New(n int64) ByteSize {
 	return ByteSize(n)
 }
 

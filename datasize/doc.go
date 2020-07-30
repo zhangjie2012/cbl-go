@@ -8,5 +8,4 @@ Reference:
   3. https://groups.google.com/forum/#!topic/golang-nuts/AHoxOtHCOyw
 
 */
-
 package datasize
