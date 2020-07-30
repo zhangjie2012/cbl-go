@@ -10,6 +10,8 @@ Package cbl is a common basic library for go.
   - `strings` 字符串扩展
   - `wechat_mini` 微信小程序
   - `yinyang` 公历和农历转换
+  - `set` set
+  - `date` 日期扩展
 
 More read `README.md`
 */
