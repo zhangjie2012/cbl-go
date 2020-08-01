@@ -5,7 +5,7 @@ import (
 )
 
 func TestB(t *testing.T) {
-	n := 1000000000000000
+	var n int64 = 1000000000000000
 	bs := New(n)
 
 	t.Log(bs.KB())
@@ -31,13 +31,13 @@ func TestFormat2String(t *testing.T) {
 
 func TestString(t *testing.T) {
 	{
-		n := 1024
-		bs := New(n)
+		var n int64 = 1024
+		bs := New(int64(n))
 		t.Log(bs.String1())
 		t.Log(bs.String2())
 	}
 	{
-		n := 2000
+		var n int64 = 1024
 		bs := New(n)
 		t.Log(bs.String1())
 		t.Log(bs.String2())
