@@ -340,12 +340,13 @@ func CounterDecr(key string) (int64, error) {
 	return redisClient.Decr(aKey).Result()
 }
 
+// CounterDecrMinZero atomic decrement, min value is 0
 func CounterDecrMinZero(key string) (int64, error) {
 	aKey := composeKey2(counterModule, key)
 
 	script := `
 local v = redis.call("GET", KEYS[1])
-if v == nil then
+if v == false then
    return -2
 end
 

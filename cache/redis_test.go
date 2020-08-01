@@ -397,6 +397,13 @@ func TestCounter(t *testing.T) {
 	v, err = CounterDecrMinZero(key)
 	t.Log(v, err) // 0, "counter zero"
 
+	v, err = CounterDecrMinZero(key)
+	t.Log(v, err) // 0, "counter zero"
+
+	key = "global.notexist.key"
+	v, err = CounterDecrMinZero(key)
+	t.Log(v, err) // 0, "counter zero"
+
 	CounterDel(key)
 }
 
