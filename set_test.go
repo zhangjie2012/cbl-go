@@ -2,6 +2,19 @@ package cbl
 
 import "testing"
 
+func TestSliceUniq(t *testing.T) {
+	a := []string{"a", "b", "c", "d", "a", "b", "d"}
+	u := SliceUniq(a)
+	t.Log(u)
+}
+
+func TestSliceUnion(t *testing.T) {
+	a := []string{"a", "b", "c", "d"}
+	b := []string{"c", "d", "e", "f"}
+	u := SliceUnion(a, b)
+	t.Log(u)
+}
+
 func TestSliceIntersection(t *testing.T) {
 	a := []string{"a", "b", "c", "d"}
 	b := []string{"b", "c", "d", "e"}

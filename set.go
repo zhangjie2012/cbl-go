@@ -1,5 +1,37 @@
 package cbl
 
+// SliceUniq 去重
+func SliceUniq(a []string) []string {
+	m := make(map[string]bool)
+	for _, v := range a {
+		m[v] = true
+	}
+
+	u := make([]string, 0)
+	for k, _ := range m {
+		u = append(u, k)
+	}
+	return u
+}
+
+// SliceUnion 并集
+func SliceUnion(a []string, b []string) []string {
+	m := make(map[string]bool)
+
+	c := append(a, b...)
+	for _, v := range c {
+		m[v] = true
+	}
+
+	u := make([]string, 0)
+	for k, _ := range m {
+		u = append(u, k)
+	}
+
+	return u
+}
+
+// SliceIntersection 交集
 func SliceIntersection(a []string, b []string) []string {
 	hash := make(map[string]bool)
 	for _, v := range a {
@@ -16,6 +48,7 @@ func SliceIntersection(a []string, b []string) []string {
 	return inter
 }
 
+// SliceDifference 差集
 func SliceDifference(a []string, b []string) []string {
 	hash := make(map[string]bool)
 	for _, v := range b {
