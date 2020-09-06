@@ -1,6 +1,9 @@
 package cbl
 
-import "time"
+import (
+	"fmt"
+	"time"
+)
 
 func StartOfDay(t time.Time) time.Time {
 	return time.Date(t.Year(), t.Month(), t.Day(), 0, 0, 0, 0, t.Location())
@@ -8,4 +11,53 @@ func StartOfDay(t time.Time) time.Time {
 
 func EndOfDay(t time.Time) time.Time {
 	return time.Date(t.Year(), t.Month(), t.Day(), 23, 59, 59, int(time.Second)-1, t.Location())
+}
+
+func FormatDayTime(t time.Time, showSec bool) string {
+	h := t.Hour()
+
+	desc := ""
+	for {
+		if h >= 5 && h < 8 {
+			desc = "早晨"
+			break
+		}
+		if h >= 8 && h < 12 {
+			desc = "上午"
+			break
+		}
+		if h >= 12 && h < 13 {
+			desc = "中午"
+			break
+		}
+		if h >= 13 && h < 18 {
+			desc = "下午"
+			break
+		}
+		if h >= 18 && h < 19 {
+			desc = "傍晚"
+			break
+		}
+		if h >= 19 && h < 23 {
+			desc = "晚上"
+			break
+		}
+		if (h >= 23 && h < 24) || (h >= 0 && h < 3) {
+			desc = "深夜"
+			break
+		}
+		if h >= 3 && h < 5 {
+			desc = "凌晨"
+			break
+		}
+		break
+	}
+
+	s := ""
+	if showSec {
+		s = fmt.Sprintf("%s %02d:%02d:%02d", desc, t.Hour(), t.Minute(), t.Second())
+	} else {
+		s = fmt.Sprintf("%s %02d:%02d", desc, t.Hour(), t.Minute())
+	}
+	return s
 }
