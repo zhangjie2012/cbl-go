@@ -25,3 +25,9 @@ func TestFormatDayTime(t *testing.T) {
 		t.Log(c, s)
 	}
 }
+
+func TestDayOfWeekCN(t *testing.T) {
+	for i := 0; i < 7; i++ {
+		t.Log(i, "->", DayOfWeekCN(i))
+	}
+}
