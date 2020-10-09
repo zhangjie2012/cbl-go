@@ -2,7 +2,9 @@
 [![go.dev reference](https://img.shields.io/badge/go.dev-reference-007d9c?logo=go&logoColor=white&style=flat-square)](https://pkg.go.dev/github.com/zhangjie2012/cbl-go)
 [![Go Report Card](https://goreportcard.com/badge/github.com/zhangjie2012/cbl-go)](https://goreportcard.com/report/github.com/zhangjie2012/cbl-go)
 
-# cbl-go: Common Basic Library for go
+# cbl-go: Common Basic Library for Go
+
+_all code test passed on Go 1.14._
 
 Install:
 
