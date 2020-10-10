@@ -4,15 +4,19 @@ import (
 	"encoding/json"
 	"fmt"
 	"strconv"
+	"sync"
 	"time"
 
 	redis "github.com/go-redis/redis/v7"
-	"github.com/sirupsen/logrus"
 )
 
 var (
-	NotExist    error = fmt.Errorf("key not exist")
-	CounterZero error = fmt.Errorf("counter zero")
+	NotExist    = fmt.Errorf("key not exist") // deprecated
+	CounterZero = fmt.Errorf("counter zero")  // deprecated
+
+	ErrNotExist             = fmt.Errorf("key not exist")
+	ErrCounterZero          = fmt.Errorf("counter zero")
+	ErrUnLockTicketNotMatch = fmt.Errorf("unlock ticket not match")
 )
 
 var (
@@ -22,38 +26,38 @@ var (
 	mqModule      string = "_mq_"
 	counterModule string = "_counter_"
 
+	once        sync.Once
 	redisClient *redis.Client = nil
 )
 
 // InitCache init cache, only init once
 func InitCache(app string, addr string, password string, db int) error {
-	client := redis.NewClient(&redis.Options{
-		Addr:     addr,
-		Password: password,
-		DB:       db,
+	once.Do(func() {
+		client := redis.NewClient(&redis.Options{
+			Addr:     addr,
+			Password: password,
+			DB:       db,
+		})
+		appName = app
+		redisClient = client
 	})
-	if _, err := client.Ping().Result(); err != nil {
+
+	if _, err := redisClient.Ping().Result(); err != nil {
 		return err
 	}
-
-	// init
-	appName = app
-	redisClient = client
-
-	logrus.Infof("init cache success|%s", addr)
 
 	return nil
 }
 
-func CloseCache() {
+func CloseCache() error {
 	if redisClient != nil {
 		if err := redisClient.Close(); err != nil {
-			logrus.Errorf("close client failure, err=%s", err)
+			return err
 		}
 		redisClient = nil
 	}
 
-	logrus.Infof("close cache")
+	return nil
 }
 
 // C expose redis client for native redis library visit
@@ -78,12 +82,10 @@ func SetObject(key string, value interface{}, expire time.Duration) error {
 		return err
 	}
 
-	val, err := redisClient.Set(realKey, bs, expire).Result()
+	_, err = redisClient.Set(realKey, bs, expire).Result()
 	if err != nil {
 		return err
 	}
-
-	logrus.Tracef("cache set object|%s|%s", realKey, val)
 
 	return nil
 }
@@ -95,7 +97,6 @@ func GetObject(key string, value interface{}) error {
 	bs, err := redisClient.Get(realKey).Bytes()
 	if err != nil {
 		if err == redis.Nil {
-			logrus.Tracef("cache missing|%s", realKey)
 			return NotExist
 		}
 		return err
@@ -104,8 +105,6 @@ func GetObject(key string, value interface{}) error {
 	if err := json.Unmarshal(bs, value); err != nil {
 		return err
 	}
-
-	logrus.Tracef("cache get object|%s", realKey)
 
 	return nil
 }
@@ -134,23 +133,19 @@ func PTTL(key string) time.Duration {
 	return d
 }
 
-func Del(key string) {
+func Del(key string) error {
 	realKey := composeKey(key)
 	_, err := redisClient.Del(realKey).Result()
-	if err != nil {
-		logrus.Tracef("del error|%s", err)
-	}
+	return err
 }
 
 func SetString(key string, value string, expire time.Duration) error {
 	realKey := composeKey(key)
 
-	val, err := redisClient.Set(realKey, []byte(value), expire).Result()
+	_, err := redisClient.Set(realKey, []byte(value), expire).Result()
 	if err != nil {
 		return err
 	}
-
-	logrus.Tracef("cache set string|%s|%s", realKey, val)
 
 	return nil
 }
@@ -161,14 +156,10 @@ func GetString(key string) (string, error) {
 	bs, err := redisClient.Get(realKey).Bytes()
 	if err != nil {
 		if err == redis.Nil {
-			logrus.Tracef("cache missing|%s", realKey)
 			return "", NotExist
 		}
 		return "", err
 	}
-
-	logrus.Tracef("cache get string|%s", realKey)
-
 	return string(bs), nil
 }
 
@@ -182,13 +173,10 @@ func GetInt(key string) (int, error) {
 	value, err := redisClient.Get(realKey).Int()
 	if err != nil {
 		if err == redis.Nil {
-			logrus.Tracef("cache missing, key=%s", realKey)
 			return 0, NotExist
 		}
 		return 0, err
 	}
-
-	logrus.Tracef("cache get int, key=%s", realKey)
 
 	return value, nil
 }
@@ -203,7 +191,6 @@ func GetInt64(key string) (int64, error) {
 	value, err := redisClient.Get(realKey).Int64()
 	if err != nil {
 		if err == redis.Nil {
-			logrus.Tracef("cache missing, key=%s", realKey)
 			return 0, NotExist
 		}
 		return 0, err
@@ -221,13 +208,10 @@ func GetFloat64(key string) (float64, error) {
 	value, err := redisClient.Get(realKey).Float64()
 	if err != nil {
 		if err == redis.Nil {
-			logrus.Tracef("cache missing|%s", realKey)
 			return 0, NotExist
 		}
 		return 0, err
 	}
-
-	logrus.Tracef("cache get float64|%s", realKey)
 
 	return value, nil
 }
@@ -235,23 +219,22 @@ func GetFloat64(key string) (float64, error) {
 func Lock(name string, ticket string, expire time.Duration) bool {
 	lockKey := composeKey2(disLockModule, name)
 	result := redisClient.SetNX(lockKey, ticket, expire).Val()
-	// logrus.Tracef("distributed lock|%s|%s|%v|%t", name, ticket, expire, result)
 	return result
 }
 
-func UnLock(name string, ticket string) {
+func UnLock(name string, ticket string) error {
 	lockKey := composeKey2(disLockModule, name)
 	v, err := redisClient.Get(lockKey).Result()
 	if err != nil {
-		return
+		return err
 	}
 
 	// just can unlock itself
 	if v == ticket {
-		redisClient.Del(lockKey)
-		// logrus.Tracef("distribute unlock success|%s|%s", name, ticket)
+		_, err := redisClient.Del(lockKey).Result()
+		return err
 	} else {
-		logrus.Tracef("distribute unlock failue|%s|%s|%s", name, v, ticket)
+		return ErrUnLockTicketNotMatch
 	}
 }
 
@@ -293,7 +276,6 @@ func MQLen(key string) int64 {
 	mqKey := composeKey2(mqModule, key)
 	count, err := redisClient.LLen(mqKey).Result()
 	if err != nil {
-		logrus.Tracef("mqlen error|%s", err)
 		return 0
 	}
 	return count
@@ -304,7 +286,6 @@ func MQDel(key string) int64 {
 	mqKey := composeKey2(mqModule, key)
 	count, err := redisClient.Del(mqKey).Result()
 	if err != nil {
-		logrus.Tracef("mqdel error|%s", err)
 		return 0
 	}
 	return count

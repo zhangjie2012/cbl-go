@@ -7,7 +7,6 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/sirupsen/logrus"
 	"github.com/zhangjie2012/cbl-go/cache"
 )
 
@@ -94,23 +93,16 @@ func ConvYinYang(year int, month int, leap int, day int) (time.Time, error) {
 	cacheKey := fmt.Sprintf("yinyang.%d.%d.%d.%d", year, month, leap, day)
 	unixTs, err := cache.GetInt64(cacheKey)
 	if err == nil {
-		logrus.Tracef("yinyang cache hited|%s", cacheKey)
 		t := time.Unix(unixTs, 0)
 		return t, nil
 	}
-
-	logrus.Tracef("yinyang cache missing|%s|%s", cacheKey, err)
 
 	t, err := convYinYang(year, month, leap, day)
 	if err != nil {
 		return time.Time{}, err
 	}
 
-	if err := cache.SetInt64(cacheKey, t.Unix(), cacheDuration); err != nil {
-		logrus.Errorf("yinyang set cache failure|%s|%s", cacheKey, err)
-	}
-
-	logrus.Tracef("set yinyang cache|%s|%s", cacheKey, t)
+	cache.SetInt64(cacheKey, t.Unix(), cacheDuration)
 
 	return t, nil
 }
@@ -151,21 +143,15 @@ func ConvYangYin(year int, month int, day int) (*YinDate, error) {
 	d := &YinDate{}
 	err := cache.GetObject(cacheKey, d)
 	if err == nil {
-		logrus.Tracef("yangyin cache hit|%s", cacheKey)
 		return d, nil
 	}
-	logrus.Tracef("yangyin cache missing|%s|%s", cacheKey, err)
 
 	d, err = convYangYin(year, month, day)
 	if err != nil {
 		return nil, err
 	}
 
-	if err := cache.SetObject(cacheKey, d, cacheDuration); err != nil {
-		logrus.Errorf("set cache failure|%s|%s", cacheKey, err)
-	}
-
-	logrus.Tracef("set yangyin cache|%s|%s", cacheKey, d.ToString1())
+	cache.SetObject(cacheKey, d, cacheDuration)
 
 	return d, nil
 }

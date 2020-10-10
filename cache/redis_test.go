@@ -6,13 +6,9 @@ import (
 	"sync"
 	"testing"
 	"time"
-
-	"github.com/sirupsen/logrus"
 )
 
 func TestMain(m *testing.M) {
-	logrus.SetLevel(logrus.TraceLevel)
-
 	var (
 		name      string = "cblcache"
 		redisAddr string = "localhost:6379"

@@ -5,12 +5,10 @@ import (
 	"os"
 	"testing"
 
-	"github.com/sirupsen/logrus"
 	"github.com/zhangjie2012/cbl-go/cache"
 )
 
 func TestMain(m *testing.M) {
-	logrus.SetLevel(logrus.TraceLevel)
 
 	var (
 		name      string = "cblcache"
