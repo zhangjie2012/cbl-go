@@ -11,11 +11,8 @@ import (
 )
 
 var (
-	NotExist    = fmt.Errorf("key not exist") // deprecated
-	CounterZero = fmt.Errorf("counter zero")  // deprecated
-
-	ErrNotExist             = fmt.Errorf("key not exist")
-	ErrCounterZero          = fmt.Errorf("counter zero")
+	NotExist                = fmt.Errorf("key not exist")
+	CounterZero             = fmt.Errorf("counter zero")
 	ErrUnLockTicketNotMatch = fmt.Errorf("unlock ticket not match")
 )
 

@@ -6,6 +6,9 @@ import (
 	"sync"
 	"testing"
 	"time"
+
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestMain(m *testing.M) {
@@ -20,12 +23,9 @@ func TestMain(m *testing.M) {
 		fmt.Printf("redis init failure, err=%s", err)
 		return
 	}
+	defer CloseCache()
 
-	ec := m.Run()
-
-	CloseCache()
-
-	os.Exit(ec)
+	os.Exit(m.Run())
 }
 
 func TestSetGetObject(t *testing.T) {
@@ -39,30 +39,21 @@ func TestSetGetObject(t *testing.T) {
 	var (
 		key   = "TestSetGetObject"
 		value = ValueT{
-			Username: "张三",
+			Username: "Bob",
 			Phonenum: "136****1234",
 			Age:      45,
 			Deposit:  10000000.89,
 		}
 	)
 
-	if err := SetObject(key, &value, 10*time.Millisecond); err != nil {
-		t.Errorf("set object failure, err=%s", err)
-		return
-	}
+	err := SetObject(key, &value, 10*time.Millisecond)
+	assert.Nil(t, err)
 
 	gValue := ValueT{}
-	if err := GetObject(key, &gValue); err != nil {
-		t.Errorf("get object failure, err=%s", err)
-		return
-	}
+	err = GetObject(key, &gValue)
+	assert.Nil(t, err)
 
-	if value.Username != gValue.Username ||
-		value.Phonenum != gValue.Phonenum ||
-		value.Age != gValue.Age ||
-		value.Deposit != gValue.Deposit {
-		t.Errorf("get set not equal, expect=%v, actual=%v", value, gValue)
-	}
+	assert.EqualValues(t, value, gValue)
 }
 
 func TestTTL(t *testing.T) {
@@ -83,96 +74,82 @@ func TestTTL(t *testing.T) {
 
 func TestDel(t *testing.T) {
 	var (
+		err error
 		key = "TestDel"
 	)
-	SetString(key, "whatever", 0)
-	Del(key)
-	t.Logf(GetString(key))
+	err = SetString(key, "whatever", 0)
+	assert.Nil(t, err)
+
+	err = Del(key)
+	assert.Nil(t, err)
+
+	v, err := GetString(key)
+	assert.Equal(t, "", v)
+	assert.Equal(t, NotExist, err)
 }
 
 func TestSetGetInt64(t *testing.T) {
 	var (
 		key         = "TestSetGetInt64"
 		value int64 = 123456789
+		err   error
 	)
-	if err := SetInt64(key, value, 10*time.Millisecond); err != nil {
-		t.Errorf("set string failure, err=%s", err)
-		return
-	}
+
+	err = SetInt64(key, value, 10*time.Millisecond)
+	require.Nil(t, err)
 
 	gValue, err := GetInt64(key)
-	if err != nil {
-		t.Errorf("get string failure, err=%s", err)
-		return
-	}
+	require.Nil(t, err)
 
-	t.Log(value, gValue)
+	assert.Equal(t, gValue, value)
 }
 
 func TestSetGetString(t *testing.T) {
 	var (
+		err   error
 		key   = "TestSetGetString"
 		value = "hello"
 	)
 
-	if err := SetString(key, value, 10*time.Millisecond); err != nil {
-		t.Errorf("set string failure, err=%s", err)
-		return
-	}
+	err = SetString(key, value, 10*time.Millisecond)
+	require.Nil(t, err)
 
 	gValue, err := GetString(key)
-	if err != nil {
-		t.Errorf("get string failure, err=%s", err)
-		return
-	}
-	if value != gValue {
-		t.Errorf("get set not equal, expect=%s, real=%s", value, gValue)
-		return
-	}
+	require.Nil(t, err)
+
+	assert.Equal(t, gValue, value)
 }
 
 func TestSetGetInt(t *testing.T) {
 	var (
+		err   error
 		key   = "TestSetGetString"
 		value = 1234
 	)
 
-	if err := SetInt(key, value, 10*time.Millisecond); err != nil {
-		t.Errorf("set int failure, err=%s", err)
-		return
-	}
+	err = SetInt(key, value, 10*time.Millisecond)
+	require.Nil(t, err)
 
 	gValue, err := GetInt(key)
-	if err != nil {
-		t.Errorf("get string failure, err=%s", err)
-		return
-	}
-	if value != gValue {
-		t.Errorf("get set not equal, expect=%d, real=%d", value, gValue)
-		return
-	}
+	require.Nil(t, err)
+
+	assert.Equal(t, value, gValue)
 }
 
 func TestSetGetFloat64(t *testing.T) {
 	var (
+		err   error
 		key           = "TestSetGetString"
 		value float64 = 3.1415926
 	)
 
-	if err := SetFloat64(key, value, 10*time.Millisecond); err != nil {
-		t.Errorf("set int failure, err=%s", err)
-		return
-	}
+	err = SetFloat64(key, value, 10*time.Millisecond)
+	require.Nil(t, err)
 
 	gValue, err := GetFloat64(key)
-	if err != nil {
-		t.Errorf("get string failure, err=%s", err)
-		return
-	}
-	if value != gValue {
-		t.Errorf("get set not equal, expect=%f, real=%f", value, gValue)
-		return
-	}
+	require.Nil(t, err)
+
+	assert.Equal(t, value, gValue)
 }
 
 func TestDisLock0(t *testing.T) {
@@ -230,41 +207,46 @@ func TestDisLock1(t *testing.T) {
 }
 
 func TestMQ(t *testing.T) {
-	key := "mqtest"
-	value := "awesome_values"
-	if err := MQPush(key, []byte(value)); err != nil {
-		t.Log("push message failure")
-		return
-	}
+	var (
+		err   error
+		key   = "mqtest"
+		value = "awesome_values"
+	)
+
+	err = MQPush(key, []byte(value))
+	require.Nil(t, err)
 
 	bs, err := MQPop(key)
-	if err != nil {
-		t.Logf("pop message failure|%s", err)
-	}
-	t.Log(string(bs))
+	require.Nil(t, err)
+	assert.EqualValues(t, value, string(bs))
 
 	bs, err = MQPop(key)
-	if err != nil {
-		t.Logf("pop message failure|%s", err)
-	}
-	t.Log(string(bs))
+	require.Equal(t, NotExist, err)
+	assert.EqualValues(t, "", string(bs))
 }
 
 // producer and consumer
 func TestMQ1(t *testing.T) {
-	key := "mqtest1"
-	count := 1000
-	wg := sync.WaitGroup{}
+	var (
+		err   error
+		key   = "mqtest1"
+		count = 1000
+		wg    = sync.WaitGroup{}
+		in    = []string{}
+		out   = []string{}
+	)
 
-	t.Logf("%s mq len = %d", key, MQDel(key))
+	MQDel(key)
 
 	// producer
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
 		for i := 0; i < count; i++ {
-			MQPush(key, []byte(fmt.Sprintf("message_%d", i)))
-			time.Sleep(1 * time.Microsecond)
+			d := fmt.Sprintf("message_%d", i)
+			err = MQPush(key, []byte(d))
+			require.Nil(t, err)
+			in = append(in, d)
 		}
 	}()
 
@@ -273,21 +255,24 @@ func TestMQ1(t *testing.T) {
 	go func() {
 		defer wg.Done()
 		for i := 0; i < count; {
-			_, err := MQPop(key)
+			o, err := MQPop(key)
 			if err != nil && err != NotExist {
 				t.Log(err.Error())
 				break
 			}
 			if err == NotExist {
-				t.Log("wait producer ...")
+				// t.Log("wait producer ...")
 				time.Sleep(1 * time.Microsecond)
 				continue
 			}
+			out = append(out, string(o))
 			i++
 		}
 	}()
 
 	wg.Wait()
+
+	assert.EqualValues(t, in, out)
 }
 
 // producer and consumer
@@ -296,7 +281,7 @@ func TestMQ2(t *testing.T) {
 	count := 1000
 	wg := sync.WaitGroup{}
 
-	t.Logf("%s mq len = %d", key, MQDel(key))
+	MQDel(key)
 
 	// producer
 	wg.Add(1)
@@ -332,7 +317,7 @@ func TestMQ3(t *testing.T) {
 	count := 1000
 	wg := sync.WaitGroup{}
 
-	t.Logf("%s mq len = %d", key, MQDel(key))
+	MQDel(key)
 
 	// producer
 	wg.Add(1)
@@ -363,52 +348,59 @@ func TestMQ3(t *testing.T) {
 }
 
 func TestCounter(t *testing.T) {
-	key := "global.counter"
-	expire := 10 * time.Second
+	var (
+		err    error
+		key    = "global.counter"
+		expire = 1 * time.Second
+	)
 
 	v, err := CounterIncr(key, expire)
-	t.Log(v, err) // 1
+	require.Nil(t, err)
+	assert.EqualValues(t, 1, v)
 
 	v, err = CounterIncrBy(key, 999, expire)
-	t.Log(v, err) // 1000
+	require.Nil(t, err)
+	assert.EqualValues(t, 1000, v)
 
 	v, err = CounterDecr(key)
-	t.Log(v, err) // 999
+	require.Nil(t, err)
+	assert.EqualValues(t, 999, v)
 
 	v, err = CounterGet(key)
-	t.Log(v, err) // 999
+	require.Nil(t, err)
+	assert.EqualValues(t, 999, v)
 
 	v, err = CounterDecrBy(key, 99)
-	t.Log(v, err) // 900
+	require.Nil(t, err)
+	assert.EqualValues(t, 900, v)
 
 	err = CounterReset(key, expire)
-	t.Log(err)
+	require.Nil(t, err)
 
 	v, err = CounterIncr(key, expire)
-	t.Log(v, err) // 1
+	require.Nil(t, err)
+	assert.EqualValues(t, 1, v)
 
 	v, err = CounterDecrMinZero(key)
-	t.Log(v, err) // 0, nil
+	require.Nil(t, err)
 
 	v, err = CounterDecrMinZero(key)
-	t.Log(v, err) // 0, "counter zero"
+	require.Equal(t, CounterZero, err)
+	assert.EqualValues(t, 0, v)
 
 	v, err = CounterDecrMinZero(key)
-	t.Log(v, err) // 0, "counter zero"
+	require.Equal(t, CounterZero, err)
+	assert.EqualValues(t, 0, v)
 
 	key = "global.notexist.key"
 	v, err = CounterDecrMinZero(key)
-	t.Log(v, err) // 0, "counter zero"
+	require.Equal(t, NotExist, err)
+	assert.EqualValues(t, 0, v)
 
 	CounterDel(key)
 }
 
 func TestLua(t *testing.T) {
 	key := "global.counter"
-	// expire := 10000 * time.Second
-
-	// v, err := CounterIncrBy(key, 10, expire)
-	//t.Log(v, err)
-
 	CounterDecrMinZero(key)
 }
