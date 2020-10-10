@@ -265,7 +265,7 @@ func MQBlockPop(key string, timeout time.Duration) ([]byte, error) {
 		return nil, NotExist
 	}
 
-	// result[] is key name
+	// result[0] is key name
 	return []byte(result[1]), nil
 }
 
