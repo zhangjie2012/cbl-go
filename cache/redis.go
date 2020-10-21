@@ -22,6 +22,7 @@ var (
 	disLockModule string = "_dislock_"
 	mqModule      string = "_mq_"
 	counterModule string = "_counter_"
+	setModule     string = "_set_"
 
 	once        sync.Once
 	redisClient *redis.Client = nil
@@ -69,6 +70,10 @@ func composeKey(source string) string {
 func composeKey2(module string, key string) string {
 	return fmt.Sprintf("%s:%s.%s", appName, module, key)
 }
+
+// ----------------------------------------------------------------------------
+// common built-in type wrapper
+// ----------------------------------------------------------------------------
 
 // SetObject set object, object must be json marshaled
 func SetObject(key string, value interface{}, expire time.Duration) error {
@@ -213,6 +218,10 @@ func GetFloat64(key string) (float64, error) {
 	return value, nil
 }
 
+// -----------------------------------------------------------------------------
+// distributed lock
+// -----------------------------------------------------------------------------
+
 func Lock(name string, ticket string, expire time.Duration) bool {
 	lockKey := composeKey2(disLockModule, name)
 	result := redisClient.SetNX(lockKey, ticket, expire).Val()
@@ -234,6 +243,10 @@ func UnLock(name string, ticket string) error {
 		return ErrUnLockTicketNotMatch
 	}
 }
+
+// -----------------------------------------------------------------------------
+// message queue
+// -----------------------------------------------------------------------------
 
 func MQPush(key string, bs []byte) error {
 	mqKey := composeKey2(mqModule, key)
@@ -287,6 +300,10 @@ func MQDel(key string) int64 {
 	}
 	return count
 }
+
+// -----------------------------------------------------------------------------
+// atomic counter
+// -----------------------------------------------------------------------------
 
 // CounterIncr atomic increment 1, return inc result value
 func CounterIncr(key string, expire time.Duration) (int64, error) {
@@ -377,4 +394,108 @@ func CounterGet(key string) (int64, error) {
 		return 0, err
 	}
 	return value, nil
+}
+
+// -----------------------------------------------------------------------------
+// Set wrapper
+// SS for Set String
+// -----------------------------------------------------------------------------
+
+// SSMembers get all members slice
+func SSMembers(key string) ([]string, error) {
+	aKey := composeKey2(setModule, key)
+	values, err := redisClient.SMembers(aKey).Result()
+	if err != nil {
+		if err == redis.Nil {
+			return nil, NotExist
+		}
+		return nil, err
+	}
+	return values, nil
+}
+
+// SSAdd add members to Set
+func SSAdd(key string, members ...string) error {
+	aKey := composeKey2(setModule, key)
+	t := []interface{}{}
+	for _, v := range members {
+		t = append(t, v)
+	}
+	_, err := redisClient.SAdd(aKey, t...).Result()
+	return err
+}
+
+// SSRem remove members from Set
+func SSRem(key string, members ...string) error {
+	aKey := composeKey2(setModule, key)
+	t := []interface{}{}
+	for _, v := range members {
+		t = append(t, v)
+	}
+	_, err := redisClient.SRem(aKey, t...).Result()
+	return err
+}
+
+// SSCount get member count
+func SSCount(key string) int64 {
+	aKey := composeKey2(setModule, key)
+	count, err := redisClient.SCard(aKey).Result()
+	if err != nil {
+		return 0
+	}
+	return count
+}
+
+// SSIsMember check set if include member
+func SSIsMember(key string, member string) bool {
+	aKey := composeKey2(setModule, key)
+	ok, err := redisClient.SIsMember(aKey, member).Result()
+	if err != nil {
+		return false
+	}
+	return ok
+}
+
+// SSRandomN random get N members
+func SSRandomN(key string, count int64) []string {
+	aKey := composeKey2(setModule, key)
+	values, err := redisClient.SRandMemberN(aKey, count).Result()
+	if err != nil {
+		return []string{}
+	}
+	return values
+}
+
+func SSDelete(key string) {
+	aKey := composeKey2(setModule, key)
+	redisClient.Del(aKey)
+}
+
+// SS_TTL seconds resolution
+// - The command returns -1 if the key exists but has no associated expire.
+// - The command returns -2 if the key does not exist.
+func SS_TTL(key string) time.Duration {
+	aKey := composeKey2(setModule, key)
+	d, err := redisClient.TTL(aKey).Result()
+	if err != nil {
+		return 0
+	}
+	return d
+}
+
+// SS_TTL milliseconds resolution
+// - The command returns -1 if the key exists but has no associated expire.
+// - The command returns -2 if the key does not exist.
+func SS_PTTL(key string) time.Duration {
+	aKey := composeKey2(setModule, key)
+	d, err := redisClient.PTTL(aKey).Result()
+	if err != nil {
+		return 0
+	}
+	return d
+}
+
+func SSExpire(key string, d time.Duration) error {
+	aKey := composeKey2(setModule, key)
+	return redisClient.Expire(aKey, d).Err()
 }

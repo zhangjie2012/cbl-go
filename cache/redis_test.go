@@ -404,3 +404,54 @@ func TestLua(t *testing.T) {
 	key := "global.counter"
 	CounterDecrMinZero(key)
 }
+
+// TestSetS test string set
+func TestSetS(t *testing.T) {
+	var (
+		err    error
+		key    = "TestSetS"
+		values = []string{}
+		count  int64
+		ok     bool
+	)
+
+	values, err = SSMembers(key)
+	require.Nil(t, err)
+	assert.Equal(t, 0, len(values))
+
+	err = SSAdd(key, "hello1", "hello2", "hello3")
+	require.Nil(t, err)
+
+	values, err = SSMembers(key)
+	require.Nil(t, err)
+	assert.EqualValues(t, 3, len(values))
+
+	count = SSCount(key)
+	assert.EqualValues(t, 3, count)
+
+	ok = SSIsMember(key, "hello2")
+	assert.Equal(t, true, ok)
+
+	ok = SSIsMember(key, "hello4")
+	assert.Equal(t, false, ok)
+
+	err = SSRem(key, "hello2")
+	assert.Nil(t, err)
+
+	count = SSCount(key)
+	assert.EqualValues(t, 2, count)
+
+	values = SSRandomN(key, 2)
+	assert.Equal(t, 2, len(values))
+
+	d := SS_TTL(key)
+	assert.EqualValues(t, -1, d)
+
+	// err = SSExpire(key, 10*time.Second)
+	// assert.Nil(t, err)
+
+	// d = SS_TTL(key)
+	// assert.EqualValues(t, -1, d)
+
+	SSDelete(key)
+}

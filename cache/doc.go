@@ -18,5 +18,9 @@ Note: not consider redis server down caused deadlock.
 Message Queue: based on redis data structure `list` map to a message queue. and `right push`, `left pop`.
 
 Counter: a global counter.
+
+SS: string set.
+
+if all method can't meet your needs, welcome PR or `C()` expose redis client, you can use native redis library.
 */
 package cache
