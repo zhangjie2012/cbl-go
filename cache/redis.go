@@ -218,6 +218,26 @@ func GetFloat64(key string) (float64, error) {
 	return value, nil
 }
 
+func SetBool(key string, b bool, expire time.Duration) error {
+	if b {
+		return SetInt(key, 1, expire)
+	} else {
+		return SetInt(key, 0, expire)
+	}
+}
+
+func GetBool(key string) (bool, error) {
+	value, err := GetInt(key)
+	if err != nil {
+		return false, err
+	}
+	if value == 1 {
+		return true, err
+	} else {
+		return false, err
+	}
+}
+
 // -----------------------------------------------------------------------------
 // distributed lock
 // -----------------------------------------------------------------------------

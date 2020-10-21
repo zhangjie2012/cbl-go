@@ -152,6 +152,24 @@ func TestSetGetFloat64(t *testing.T) {
 	assert.Equal(t, value, gValue)
 }
 
+func TestSetGetBool(t *testing.T) {
+	var (
+		err   error
+		key   = "TestSetGetBool"
+		value bool
+	)
+
+	value, err = GetBool(key)
+	assert.Equal(t, NotExist, err)
+
+	err = SetBool(key, true, 10*time.Millisecond)
+	require.Nil(t, err)
+
+	value, err = GetBool(key)
+	require.Nil(t, err)
+	require.Equal(t, true, value)
+}
+
 func TestDisLock0(t *testing.T) {
 	var (
 		key    = "awesomelock0"
