@@ -409,7 +409,7 @@ func CounterGet(key string) (int64, error) {
 	value, err := redisClient.Get(aKey).Int64()
 	if err != nil {
 		if err == redis.Nil {
-			return 0, nil
+			return 0, NotExist
 		}
 		return 0, err
 	}
