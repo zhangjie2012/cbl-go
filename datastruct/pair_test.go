@@ -10,8 +10,8 @@ func TestPairs(t *testing.T) {
 	var (
 		m  = map[string]string{"a": "aaa", "b": "bbb", "c": "ccc"}
 		s  = ""
-		s1 = "a=aaa, b=bbb, c=ccc"
-		s2 = "a==aaa; b==bbb; c==ccc"
+		s1 = `a="aaa", b="bbb", c="ccc"`
+		s2 = `a=="aaa"; b=="bbb"; c=="ccc"`
 	)
 
 	pairs := NewPairsFromMap(m)

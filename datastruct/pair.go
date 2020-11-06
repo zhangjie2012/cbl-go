@@ -40,7 +40,7 @@ func (pairs Pairs) ToString(kvSep, pSep string) string {
 
 	ss := make([]string, 0, len(pairs))
 	for _, p := range pairs {
-		ss = append(ss, fmt.Sprintf("%s%s%s", p.Key, kvSep, p.Val))
+		ss = append(ss, fmt.Sprintf(`%s%s"%s"`, p.Key, kvSep, p.Val))
 	}
 	return strings.Join(ss, pSep)
 }
