@@ -16,7 +16,7 @@ go get -u github.com/zhangjie2012/cbl-go
   + **generator**: uuid, session id, verfiy code
   + **date expand**
   + **set operations**: uniq, union, intersection, difference
-  + **yinyang**: 公历、公里转换 _deprecated_
+  + **yinyang**: 公历、农历转换 _deprecated_
 - Data Structure
   + **MultiError**: muliple error expression
   + **Pair**: key value struct
