@@ -21,4 +21,4 @@ go get -u github.com/zhangjie2012/cbl-go
   + **MultiError**: muliple error expression
   + **Pair**: key value struct
 - **cache**: a redis wrapper, easy to use, include common operator, mq, dislock, set
-- **datasize** byte to KB/MB/GB/TB/PB/EB, KiB/MiB/GiB/TiB/PiB/EiB and more elegent to string
+- **datasize**: byte to KB/MB/GB/TB/PB/EB, KiB/MiB/GiB/TiB/PiB/EiB and more elegent to string
