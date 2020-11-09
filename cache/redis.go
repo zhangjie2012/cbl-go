@@ -242,6 +242,23 @@ func GetBool(key string) (bool, error) {
 // distributed lock
 // -----------------------------------------------------------------------------
 
+// TryLock if lock failure, max wait "timeout" duration (retry lock)
+func TryLock(name string, ticket string, expire time.Duration, timeout time.Duration) bool {
+	t := time.NewTimer(timeout)
+	for {
+		select {
+		case <-t.C:
+			return false
+		default:
+			result := Lock(name, ticket, expire)
+			if result {
+				return true
+			}
+			time.Sleep(10 * time.Millisecond)
+		}
+	}
+}
+
 func Lock(name string, ticket string, expire time.Duration) bool {
 	lockKey := composeKey2(disLockModule, name)
 	result := redisClient.SetNX(lockKey, ticket, expire).Val()

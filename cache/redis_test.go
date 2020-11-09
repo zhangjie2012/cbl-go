@@ -224,6 +224,41 @@ func TestDisLock1(t *testing.T) {
 	wg.Wait()
 }
 
+func TestTryLock(t *testing.T) {
+	var (
+		key     = "awesomelock2"
+		ticket1 = "ticket_1"
+		ticket2 = "ticket_2"
+	)
+
+	wg := sync.WaitGroup{}
+	defer wg.Wait()
+
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+
+		r := Lock(key, ticket1, 3*time.Second)
+		require.Equal(t, true, r)
+
+		time.Sleep(100 * time.Millisecond)
+
+		err := UnLock(key, ticket1)
+		assert.Nil(t, err)
+	}()
+	time.Sleep(10 * time.Millisecond)
+
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+
+		r := TryLock(key, ticket2, 3*time.Second, 10*time.Second)
+		assert.Equal(t, true, r)
+		err := UnLock(key, ticket2)
+		assert.Nil(t, err)
+	}()
+}
+
 func TestMQ(t *testing.T) {
 	var (
 		err   error
