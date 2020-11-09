@@ -12,6 +12,8 @@ package cbl
 import (
 	"crypto/sha256"
 	"fmt"
+	"math/rand"
+	"time"
 
 	"github.com/google/uuid"
 )
@@ -45,4 +47,32 @@ func GenUSessionID() string {
 // GenRSessionID generate a random session id, most business scene recommand
 func GenRSessionID() string {
 	return GenUUIDV4()
+}
+
+func genVerifyCode(pool string, width int) string {
+	s := rand.NewSource(time.Now().UnixNano())
+	r := rand.New(s)
+
+	code := make([]byte, 0, width)
+	for i := 0; i < width; i++ {
+		code = append(code, pool[r.Intn(len(pool))])
+	}
+	return string(code)
+}
+
+// GenVerifyCodeAny generate verify code, get from pool
+func GenVerifyCodeAny(pool string, width int) string {
+	return genVerifyCode(pool, width)
+}
+
+// GenVerifyCodeNumber generate verify code, all is number
+func GenVerifyCodeNumber(width int) string {
+	pool := "0123456789"
+	return genVerifyCode(pool, width)
+}
+
+// GenVerifyCodeCommon generate verify code, letter + number
+func GenVerifyCodeCommon(width int) string {
+	pool := "abcdefghigklmnopqrstuvwxyz0123456789"
+	return genVerifyCode(pool, width)
 }
