@@ -4,17 +4,21 @@
 
 # cbl-go: Common Basic Library for Go
 
-_all code test passed on Go 1.14._
-
 Install:
 
 ``` shell
 go get -u github.com/zhangjie2012/cbl-go
 ```
 
-Run TestCase:
+## Libraries include
 
-``` shell
-go test -count=1 -v ./...
-go test -count=1 -v cache/* -test.run TestMQ
-```
+- Common
+  + **generator**: uuid, session id, verfiy code
+  + **date expand**
+  + **set operations**: uniq, union, intersection, difference
+  + **yinyang**: 公历、公里转换 _deprecated_
+- Data Structure
+  + **MultiError**: muliple error expression
+  + **Pair**: key value struct
+- **cache**: a redis wrapper, easy to use, include common operator, mq, dislock, set
+- **datasize** byte to KB/MB/GB/TB/PB/EB, KiB/MiB/GiB/TiB/PiB/EiB and more elegent to string
