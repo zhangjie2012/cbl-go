@@ -1,6 +1,7 @@
 package cbl
 
 import (
+	"fmt"
 	"strings"
 )
 
@@ -32,4 +33,16 @@ func TruncateString(str string, length int) string {
 		}
 	}
 	return truncated
+}
+
+// Int64SliceToString a int64 slice to string
+// Ref: https://stackoverflow.com/questions/37532255/one-liner-to-transform-int-into-string
+func Int64SliceToString(a []int64, delim string) string {
+	return strings.Trim(strings.Join(strings.Split(fmt.Sprint(a), " "), delim), "[]")
+}
+
+// IntSliceToString a int64 slice to string
+// Ref: https://stackoverflow.com/questions/37532255/one-liner-to-transform-int-into-string
+func IntSliceToString(a []int, delim string) string {
+	return strings.Trim(strings.Join(strings.Split(fmt.Sprint(a), " "), delim), "[]")
 }

@@ -27,3 +27,15 @@ func TestTruncateString(t *testing.T) {
 		assert.EqualValues(t, r, dl[2])
 	}
 }
+
+func TestInt64SliceToString(t *testing.T) {
+	a := []int64{1, 2, 3, 4, 5, 6}
+	b := Int64SliceToString(a, ", ")
+	assert.Equal(t, "1, 2, 3, 4, 5, 6", b)
+}
+
+func TestIntSliceToString(t *testing.T) {
+	a := []int{1, 2, 3, 4, 5, 6}
+	b := IntSliceToString(a, ", ")
+	assert.Equal(t, "1, 2, 3, 4, 5, 6", b)
+}
