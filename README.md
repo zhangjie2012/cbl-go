@@ -7,7 +7,7 @@
 Install:
 
 ``` shell
-go get github.com/zhangjie2012/cbl-go@master # master version, sugguest
+go get github.com/zhangjie2012/cbl-go@master # master version, recommand
 go get -u github.com/zhangjie2012/cbl-go # new release version
 ```
 
