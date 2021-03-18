@@ -8,6 +8,18 @@ func TestSliceUniq(t *testing.T) {
 	t.Log(u)
 }
 
+func TestSliceUniqInt64(t *testing.T) {
+	a := []int64{1, 1, 3, 1, 5}
+	u := SliceUniqInt64(a)
+	t.Log(u)
+}
+
+func TestSliceUniqInt(t *testing.T) {
+	a := []int{1, 1, 3, 1, 5}
+	u := SliceUniqInt(a)
+	t.Log(u)
+}
+
 func TestSliceUnion(t *testing.T) {
 	a := []string{"a", "b", "c", "d"}
 	b := []string{"c", "d", "e", "f"}

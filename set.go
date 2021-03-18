@@ -14,6 +14,32 @@ func SliceUniq(a []string) []string {
 	return u
 }
 
+func SliceUniqInt64(a []int64) []int64 {
+	m := make(map[int64]bool)
+	for _, v := range a {
+		m[v] = true
+	}
+
+	u := make([]int64, 0)
+	for k := range m {
+		u = append(u, k)
+	}
+	return u
+}
+
+func SliceUniqInt(a []int) []int {
+	m := make(map[int]bool)
+	for _, v := range a {
+		m[v] = true
+	}
+
+	u := make([]int, 0)
+	for k := range m {
+		u = append(u, k)
+	}
+	return u
+}
+
 // SliceUnion 并集
 func SliceUnion(a []string, b []string) []string {
 	m := make(map[string]bool)
