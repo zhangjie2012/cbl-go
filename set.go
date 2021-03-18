@@ -8,7 +8,7 @@ func SliceUniq(a []string) []string {
 	}
 
 	u := make([]string, 0)
-	for k, _ := range m {
+	for k := range m {
 		u = append(u, k)
 	}
 	return u
@@ -50,7 +50,7 @@ func SliceUnion(a []string, b []string) []string {
 	}
 
 	u := make([]string, 0)
-	for k, _ := range m {
+	for k := range m {
 		u = append(u, k)
 	}
 
