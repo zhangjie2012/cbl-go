@@ -2,6 +2,7 @@ package cbl
 
 import (
 	"fmt"
+	"math"
 	"time"
 )
 
@@ -81,4 +82,37 @@ func DayOfWeekCN(n int) string {
 	default:
 		return "未知"
 	}
+}
+
+func DurationString(d time.Duration) string {
+	sec := d.Seconds()
+
+	var interval float64
+	interval = math.Floor(sec / 31536000)
+	if interval > 1 {
+		return fmt.Sprintf("%d 年", int64(interval))
+	}
+
+	interval = math.Floor(sec / 2592000)
+	if interval > 1 {
+		return fmt.Sprintf("%d 月", int64(interval))
+	}
+
+	interval = math.Floor(sec / 86400)
+	if interval > 1 {
+		return fmt.Sprintf("%d 天", int64(interval))
+	}
+
+	interval = math.Floor(sec / 3600)
+	if interval > 1 {
+		return fmt.Sprintf("%d 小时", int64(interval))
+	}
+
+	interval = math.Floor(sec / 60)
+	if interval > 1 {
+		return fmt.Sprintf("%d 分钟", int64(interval))
+	}
+
+	interval = math.Floor(sec)
+	return fmt.Sprintf("%d 秒", int64(interval))
 }
