@@ -45,11 +45,6 @@ func EndOfYear(t time.Time) time.Time {
 }
 
 func RangeYear(t time.Time) []time.Time {
-	start := time.Now()
-	defer func() {
-		fmt.Println(time.Since(start))
-	}()
-
 	s := StartOfYear(t)
 
 	dates := []time.Time{}
