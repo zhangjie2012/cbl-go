@@ -30,8 +30,8 @@ func RangeMonth(t time.Time) []time.Time {
 
 	dates := []time.Time{}
 	for d := s; d.Month() == s.Month(); d = d.AddDate(0, 0, 1) {
-		t := time.Date(d.Year(), d.Month(), d.Day(), d.Hour(), d.Minute(), d.Second(), d.Nanosecond(), d.Location())
-		dates = append(dates, t)
+		t1 := time.Date(d.Year(), d.Month(), d.Day(), 0, 0, 0, 0, d.Location())
+		dates = append(dates, t1)
 	}
 	return dates
 }
@@ -49,8 +49,8 @@ func RangeYear(t time.Time) []time.Time {
 
 	dates := []time.Time{}
 	for d := s; d.Year() == s.Year(); d = d.AddDate(0, 0, 1) {
-		t := time.Date(d.Year(), d.Month(), d.Day(), d.Hour(), d.Minute(), d.Second(), d.Nanosecond(), d.Location())
-		dates = append(dates, t)
+		t1 := time.Date(d.Year(), d.Month(), d.Day(), 0, 0, 0, 0, d.Location())
+		dates = append(dates, t1)
 	}
 	return dates
 }
