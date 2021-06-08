@@ -141,3 +141,61 @@ func TestRangeYear(t *testing.T) {
 		t.Log(d)
 	}
 }
+
+func TestStartOfWeek(t *testing.T) {
+	loc := time.Now().Location()
+	{
+		current := time.Date(2021, 6, 7, 20, 58, 30, 0, loc)
+		result := StartOfWeek(current)
+		assert.EqualValues(t, 7, result.Day())
+	}
+	{
+		current := time.Date(2021, 6, 9, 20, 58, 30, 0, loc)
+		result := StartOfWeek(current)
+		assert.EqualValues(t, 7, result.Day())
+	}
+	{
+		current := time.Date(2021, 6, 13, 20, 58, 30, 0, loc)
+		result := StartOfWeek(current)
+		assert.EqualValues(t, 7, result.Day())
+	}
+	{
+		current := time.Date(2021, 6, 14, 20, 58, 30, 0, loc)
+		result := StartOfWeek(current)
+		assert.EqualValues(t, 14, result.Day())
+	}
+}
+
+func TestEndOfWeek(t *testing.T) {
+	loc := time.Now().Location()
+	{
+		current := time.Date(2021, 6, 7, 20, 58, 30, 0, loc)
+		result := EndOfWeek(current)
+		assert.EqualValues(t, 13, result.Day())
+	}
+	{
+		current := time.Date(2021, 6, 9, 20, 58, 30, 0, loc)
+		result := EndOfWeek(current)
+		assert.EqualValues(t, 13, result.Day())
+	}
+	{
+		current := time.Date(2021, 6, 13, 20, 58, 30, 0, loc)
+		result := EndOfWeek(current)
+		assert.EqualValues(t, 13, result.Day())
+	}
+	{
+		current := time.Date(2021, 6, 14, 20, 58, 30, 0, loc)
+		result := EndOfWeek(current)
+		assert.EqualValues(t, 20, result.Day())
+	}
+}
+
+func TestRangeWeek(t *testing.T) {
+	loc := time.Now().Location()
+	current := time.Date(2021, 6, 8, 20, 58, 30, 0, loc)
+
+	ds := RangeWeek(current)
+	for _, d := range ds {
+		t.Log(d)
+	}
+}

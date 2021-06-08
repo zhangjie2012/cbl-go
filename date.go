@@ -55,6 +55,34 @@ func RangeYear(t time.Time) []time.Time {
 	return dates
 }
 
+// StartOfWeek week first day
+func StartOfWeek(t time.Time) time.Time {
+	for t.Weekday() != time.Monday {
+		t = t.AddDate(0, 0, -1)
+	}
+	return time.Date(t.Year(), t.Month(), t.Day(), 0, 0, 0, 0, t.Location())
+}
+
+// EndOfWeek week last day
+func EndOfWeek(t time.Time) time.Time {
+	for t.Weekday() != time.Sunday {
+		t = t.AddDate(0, 0, 1)
+	}
+	return time.Date(t.Year(), t.Month(), t.Day(), 23, 59, 59, 999999999, t.Location())
+}
+
+func RangeWeek(t time.Time) []time.Time {
+	d := StartOfWeek(t)
+
+	dates := []time.Time{}
+	for i := 0; i < 7; i++ {
+		t1 := d.AddDate(0, 0, i)
+		t2 := time.Date(t1.Year(), t1.Month(), t1.Day(), 0, 0, 0, 0, t1.Location())
+		dates = append(dates, t2)
+	}
+	return dates
+}
+
 func FormatDayTime(t time.Time, showSec bool) string {
 	h := t.Hour()
 
