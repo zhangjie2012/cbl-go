@@ -81,3 +81,33 @@ func TestDurationString(t *testing.T) {
 		assert.Equal(t, "0 秒", DurationString(d))
 	}
 }
+
+func TestStartOfMonth(t *testing.T) {
+	loc := time.Now().Location()
+	current := time.Date(2021, 6, 8, 20, 58, 30, 0, loc)
+	result := StartOfMonth(current)
+
+	assert.EqualValues(t, 2021, result.Year())
+	assert.EqualValues(t, 6, result.Month())
+	assert.EqualValues(t, 1, result.Day())
+}
+
+func TestEndOfMonth(t *testing.T) {
+	loc := time.Now().Location()
+	current := time.Date(2021, 6, 8, 20, 58, 30, 0, loc)
+	result := EndOfMonth(current)
+
+	assert.EqualValues(t, 2021, result.Year())
+	assert.EqualValues(t, 6, result.Month())
+	assert.EqualValues(t, 30, result.Day())
+}
+
+func TestRangeMonth(t *testing.T) {
+	loc := time.Now().Location()
+	current := time.Date(2021, 6, 8, 20, 58, 30, 0, loc)
+
+	ds := RangeMonth(current)
+	for _, d := range ds {
+		t.Log(d)
+	}
+}

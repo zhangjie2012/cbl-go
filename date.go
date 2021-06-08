@@ -1,6 +1,7 @@
 package cbl
 
 import (
+	"encoding/json"
 	"fmt"
 	"math"
 	"time"
@@ -12,6 +13,30 @@ func StartOfDay(t time.Time) time.Time {
 
 func EndOfDay(t time.Time) time.Time {
 	return time.Date(t.Year(), t.Month(), t.Day(), 23, 59, 59, int(time.Second)-1, t.Location())
+}
+
+// StartOfMonth month start datetime
+func StartOfMonth(t time.Time) time.Time {
+	return time.Date(t.Year(), t.Month(), 1, 0, 0, 0, 0, t.Location())
+}
+
+// EndOfMonth month end datetime
+func EndOfMonth(t time.Time) time.Time {
+	return time.Date(t.Year(), t.Month()+1, 0, 23, 59, 59, 999999999, t.Location())
+}
+
+// RangeMonth get month every day date
+func RangeMonth(t time.Time) []time.Time {
+	s := StartOfMonth(t)
+
+	dates := []time.Time{}
+	for d := s; d.Month() == s.Month(); d = d.AddDate(0, 0, 1) {
+		bs, _ := json.Marshal(d)
+		t := time.Time{}
+		json.Unmarshal(bs, &t)
+		dates = append(dates, t)
+	}
+	return dates
 }
 
 func FormatDayTime(t time.Time, showSec bool) string {
