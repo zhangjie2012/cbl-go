@@ -39,6 +39,30 @@ func RangeMonth(t time.Time) []time.Time {
 	return dates
 }
 
+func StartOfYear(t time.Time) time.Time {
+	return time.Date(t.Year(), time.January, 1, 0, 0, 0, 0, t.Location())
+}
+
+func EndOfYear(t time.Time) time.Time {
+	return time.Date(t.Year()+1, time.January, 0, 23, 59, 59, 999999999, t.Location())
+}
+
+func RangeYear(t time.Time) []time.Time {
+	start := time.Now()
+	defer func() {
+		fmt.Println(time.Since(start))
+	}()
+
+	s := StartOfYear(t)
+
+	dates := []time.Time{}
+	for d := s; d.Year() == s.Year(); d = d.AddDate(0, 0, 1) {
+		t := time.Date(d.Year(), d.Month(), d.Day(), d.Hour(), d.Minute(), d.Second(), d.Nanosecond(), d.Location())
+		dates = append(dates, t)
+	}
+	return dates
+}
+
 func FormatDayTime(t time.Time, showSec bool) string {
 	h := t.Hour()
 

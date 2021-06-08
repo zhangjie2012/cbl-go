@@ -111,3 +111,33 @@ func TestRangeMonth(t *testing.T) {
 		t.Log(d)
 	}
 }
+
+func TestStartOfYear(t *testing.T) {
+	loc := time.Now().Location()
+	current := time.Date(2021, 6, 8, 20, 58, 30, 0, loc)
+	result := StartOfYear(current)
+
+	assert.EqualValues(t, 2021, result.Year())
+	assert.EqualValues(t, 1, result.Month())
+	assert.EqualValues(t, 1, result.Day())
+}
+
+func TestEndOfYear(t *testing.T) {
+	loc := time.Now().Location()
+	current := time.Date(2021, 6, 8, 20, 58, 30, 0, loc)
+	result := EndOfYear(current)
+
+	assert.EqualValues(t, 2021, result.Year())
+	assert.EqualValues(t, 12, result.Month())
+	assert.EqualValues(t, 31, result.Day())
+}
+
+func TestRangeYear(t *testing.T) {
+	loc := time.Now().Location()
+	current := time.Date(2021, 6, 8, 20, 58, 30, 0, loc)
+
+	ds := RangeYear(current)
+	for _, d := range ds {
+		t.Log(d)
+	}
+}
